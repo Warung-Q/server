@@ -4,9 +4,9 @@
   "description": "server for Warung-Q",
   "main": "index.js",
   "scripts": {
-    "test": " jest --runInBand",
+    "test": "NODE_ENV=development jest --detectOpenHandles --runInBand",
     "dev": "NODE_ENV=development nodemon ./bin/http.js",
-    "start": "node ./bin/http.js"
+    "start": "nodemon ./bin/http.js"
   },
   "repository": {
     "type": "git",
