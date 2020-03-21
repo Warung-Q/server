@@ -89,7 +89,7 @@ describe('Warung test route', () => {
         .end((err, response) => {
           expect(err).toBe(null)
           expect(response.body).toHaveProperty('msg', 'NOT FOUND')
-          expect(response.body).toHaveProperty('errors', 'DATA NOT FOUND')
+         expect(response.body).toHaveProperty('errors', 'DATA NOT FOUND')
           expect(response.status).toBe(404)
           done()
         })
