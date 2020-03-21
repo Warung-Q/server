@@ -3,7 +3,7 @@ const WarungController = require('../controllers/WarungController')
 const { authentication } = require('../middlewares/authentication')
 const { authorize } = require('../middlewares/authorization')
 
-router.use(authentication)
+// router.use(authentication)
 
 router.get('/', WarungController.findAll)
 

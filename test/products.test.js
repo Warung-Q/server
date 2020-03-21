@@ -1,32 +1,50 @@
 const request = require('supertest')
 const app = require('../app')
-const { Manager, sequelize, Product } = require('../models')
+const { Owner, Warung, sequelize, Product } = require('../models')
 const { queryInterface } = sequelize
 const jwt = require('jsonwebtoken')
 let access_token, access_token_2
+let idOwnerTemp
+const private_key = process.env.PRIVATEKEY
 
 describe('Product test route', () => {
   beforeAll(done => {
-    const managers = [
-      {
-        username: 'fakhran',
-        email: 'fakhran@mail.com',
-        password: 'fakhran123'
-      },
-      {
-        username: 'user',
-        email: 'yufi@mail.com',
-        password: '123456'
-      }
-    ]
-
-    Manager.bulkCreate(managers)
+    Owner.create({
+      username: 'fakhran',
+      email: 'fakhran@mail.com',
+      password: 'fakhran123'
+    })
       .then(result => {
-        const payload1 = { id: result[0].id, WarungId: 1 }
-        const payload2 = { id: result[1].id, WarungId: 2 }
-        access_token = jwt.sign(payload1, process.env.PRIVATEKEY)
-        access_token_2 = jwt.sign(payload2, process.env.PRIVATEKEY)
-        console.log(access_token, ' dari before all')
+        idOwnerTemp = result.id
+        let payload = {
+          id: result.id,
+          email: result.email
+        }
+        access_token = jwt.sign(
+          {
+            payload
+          },
+          private_key
+        )
+        return Warung.create({
+          name: 'warung sepatan',
+          OwnerId: idOwnerTemp,
+          ManagerId: 2
+        })
+      })
+      .then(data => {
+        idWarungTemp = data.id
+        done()
+      })
+      .catch(err => {
+        done(err)
+      })
+  })
+
+  afterAll(done => {
+    queryInterface
+      .bulkDelete('Warungs', {})
+      .then(data => {
         done()
       })
       .catch(err => {
@@ -47,7 +65,7 @@ describe('Product test route', () => {
 
   afterAll(done => {
     queryInterface
-      .bulkDelete('Managers', {})
+      .bulkDelete('Owners', {})
       .then(result => {
         done()
       })
@@ -61,7 +79,7 @@ describe('Product test route', () => {
       test('It should return data new product with status 201', done => {
         request(app)
           .post('/products')
-          .set('token', access_token)
+          .set('access_token', access_token)
           .send({
             name: 'sunlight',
             price: 5000,
@@ -94,7 +112,7 @@ describe('Product test route', () => {
         test('product name null', done => {
           request(app)
             .post('/products')
-            .set('token', access_token)
+            .set('access_token', access_token)
             .send({
               name: null,
               price: 5000,
@@ -117,7 +135,7 @@ describe('Product test route', () => {
         test('product name empty', done => {
           request(app)
             .post('/products')
-            .set('token', access_token)
+            .set('access_token', access_token)
             .send({
               name: '',
               price: 5000,
@@ -142,7 +160,7 @@ describe('Product test route', () => {
         test('price null', done => {
           request(app)
             .post('/products')
-            .set('token', access_token)
+            .set('access_token', access_token)
             .send({
               name: 'sunlight',
               price: null,
@@ -165,7 +183,7 @@ describe('Product test route', () => {
         test('price empty', done => {
           request(app)
             .post('/products')
-            .set('token', access_token)
+            .set('access_token', access_token)
             .send({
               name: 'sunlight',
               price: '',
@@ -188,12 +206,13 @@ describe('Product test route', () => {
         test('price negative', done => {
           request(app)
             .post('/products')
-            .set('token', access_token)
+            .set('access_token', access_token)
             .send({
               name: 'sunlight',
               price: -10000,
               stock: 15,
-              barocode: '123891312',
+              expired_date: new Date(),
+              barcode: '123891312',
               CategoryId: 1
             })
             .end((err, response) => {
@@ -212,7 +231,7 @@ describe('Product test route', () => {
         test('stock null', done => {
           request(app)
             .post('/products')
-            .set('token', access_token)
+            .set('access_token', access_token)
             .send({
               name: 'sunlight',
               price: 5000,
@@ -235,7 +254,7 @@ describe('Product test route', () => {
         test('stock empty', done => {
           request(app)
             .post('/products')
-            .set('token', access_token)
+            .set('access_token', access_token)
             .send({
               name: 'sunlight',
               price: 5000,
@@ -259,7 +278,7 @@ describe('Product test route', () => {
         test('stock negative', done => {
           request(app)
             .post('/products')
-            .set('token', access_token)
+            .set('access_token', access_token)
             .send({
               name: 'sunlight',
               price: 10000,
@@ -284,7 +303,7 @@ describe('Product test route', () => {
         test('barcode null', done => {
           request(app)
             .post('/products')
-            .set('token', access_token)
+            .set('access_token', access_token)
             .send({
               name: 'sunlight',
               price: 5000,
@@ -307,7 +326,7 @@ describe('Product test route', () => {
         test('barcode empty', done => {
           request(app)
             .post('/products')
-            .set('token', access_token)
+            .set('access_token', access_token)
             .send({
               name: 'sunlight',
               price: 5000,
@@ -332,7 +351,7 @@ describe('Product test route', () => {
         test('category null', done => {
           request(app)
             .post('/products')
-            .set('token', access_token)
+            .set('access_token', access_token)
             .send({
               name: 'sunlight',
               price: 5000,
@@ -355,7 +374,7 @@ describe('Product test route', () => {
         test('category empty', done => {
           request(app)
             .post('/products')
-            .set('token', access_token)
+            .set('access_token', access_token)
             .send({
               name: 'sunlight',
               price: 5000,
@@ -402,7 +421,7 @@ describe('Product test route', () => {
       test(' (Put) it should return msg success with status 1', done => {
         request(app)
           .put(`/products/${id}`)
-          .set('token', access_token)
+          .set('access_token', access_token)
           .send({
             name: 'sunlight merah',
             price: 5000,
@@ -427,7 +446,7 @@ describe('Product test route', () => {
       test(' (Patch) it should return msg success with status 1', done => {
         request(app)
           .patch(`/products/${id}`)
-          .set('token', access_token)
+          .set('access_token', access_token)
           .send({
             stock: 15
           })
@@ -448,7 +467,7 @@ describe('Product test route', () => {
       test('(put) fail in wrong product id', done => {
         request(app)
           .put(`/products/${id + 100}`)
-          .set('token', access_token)
+          .set('access_token', access_token)
           .send({
             name: 'sunlight merah',
             price: 5000,
@@ -471,7 +490,7 @@ describe('Product test route', () => {
       test('(patch) fail in wrong product id', done => {
         request(app)
           .patch(`/products/${id + 100}`)
-          .set('token', access_token)
+          .set('access_token', access_token)
           .send({
             stock: 15
           })
@@ -487,7 +506,7 @@ describe('Product test route', () => {
       test('not login/ invalid token', done => {
         request(app)
           .put(`/products/${id}`)
-          .set('token', 'empty_token')
+          .set('access_token', 'empty_token')
           .send({
             name: 'sunlight',
             price: 7000,
@@ -534,7 +553,7 @@ describe('Product test route', () => {
       test('it should return status 1 with success msg', done => {
         request(app)
           .delete(`/products/${id}`)
-          .set('token', access_token)
+          .set('access_token', access_token)
           .end((err, response) => {
             expect(err).toBe(null)
             expect(response.body).toHaveProperty('status', 1)
@@ -552,7 +571,7 @@ describe('Product test route', () => {
       test('wrong product id', done => {
         request(app)
           .delete(`/products/${id + 1}`)
-          .set('token', access_token)
+          .set('access_token', access_token)
           .end((err, response) => {
             expect(err).toBe(null)
             console.log(response.body, 'body')
@@ -567,7 +586,7 @@ describe('Product test route', () => {
     test('not authorized', done => {
       request(app)
         .delete(`/products/${id}`)
-        .set('token', another_token)
+        .set('access_token', another_token)
         .end((err, response) => {
           expect(err).toBe(null)
           expect(response.body).toHaveProperty('msg', 'Bad Request')
@@ -605,7 +624,7 @@ describe('Product test route', () => {
       test('it should return a product', done => {
         request(app)
           .get(`/products/${id}`)
-          .set('token', access_token)
+          .set('access_token', access_token)
           .end((err, response) => {
             expect(err).toBe(null)
             console.log(response.body, id)
@@ -627,7 +646,7 @@ describe('Product test route', () => {
       test('not login/ invalid token', done => {
         request(app)
           .get(`/products/${id}`)
-          .set('token', 'access_token')
+          .set('access_token', 'access_token')
           .end((err, response) => {
             expect(err).toBe(null)
             expect(response.body).toHaveProperty('msg', 'Forbidden')
@@ -647,7 +666,7 @@ describe('Product test route', () => {
       test('it should return arrary of products', done => {
         request(app)
           .get(`/products`)
-          .set('token', access_token)
+          .set('access_token', access_token)
           .end((err, response) => {
             expect(err).toBe(null)
             expect(response.body).toHaveProperty('products', expect.any(Array))
@@ -660,8 +679,8 @@ describe('Product test route', () => {
     describe('fail find all', () => {
       test('not login/ invalid token', done => {
         request(app)
-          .get(`/products/${id}`)
-          .set('token', 'access_token')
+          .get(`/products/`)
+          .set('access_token', 'access_token')
           .end((err, response) => {
             expect(err).toBe(null)
             expect(response.body).toHaveProperty('msg', 'Forbidden')

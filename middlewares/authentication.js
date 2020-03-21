@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const { Owner } = require('../models')
+const { Owner, Warung } = require('../models')
 const private_key = process.env.PRIVATEKEY
 
 module.exports = {
@@ -10,10 +10,12 @@ module.exports = {
       Owner.findOne({
         where: {
           id: decoded.payload.id
-        }
+        },
+        include: Warung
       })
         .then(data => {
           if (data) {
+            req.WarungId = data.Warung.id
             req.OwnerId = data.id
             next()
           } else {
