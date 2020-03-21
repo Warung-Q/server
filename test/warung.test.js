@@ -88,7 +88,7 @@ describe('Warung test route', () => {
         .set('access_token', wrong_access_token)
         .end((err, response) => {
           expect(err).toBe(null)
-          expect(response.body).toHaveProperty('err', 'NOT FOUND')
+          expect(response.body).toHaveProperty('msg', 'NOT FOUND')
           expect(response.body).toHaveProperty('errors', 'DATA NOT FOUND')
           expect(response.status).toBe(404)
           done()

@@ -14,7 +14,6 @@ class OwnerController {
         res.status(201).json(data)
       })
       .catch(err => {
-        // console.log(err)
         next(err)
       })
   }
@@ -58,11 +57,7 @@ class OwnerController {
         }
       })
       .catch(err => {
-        console.log(err)
-        next({
-          msg: 'login failed',
-          errors: 'invalid email or password'
-        })
+        next(err)
       })
   }
 }
