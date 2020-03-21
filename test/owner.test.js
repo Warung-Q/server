@@ -98,7 +98,6 @@ describe('Owner Register', () => {
 })
 
 describe('Owner Login', () => {
-  let emailTemp
   beforeAll(done => {
     Owner.create({
       username: 'yufi',
@@ -106,7 +105,6 @@ describe('Owner Login', () => {
       password: 'yufi123'
     })
       .then(result => {
-        emailTemp = result.email
         done()
       })
       .catch(err => {
