@@ -3,12 +3,12 @@ module.exports = (err, req, res, next) => {
   let status = 500
   if (err.name === 'SequelizeValidationError') {
     status = 400
-    errObj.err = err.name
+    errObj.msg = 'Bad Request'
     errObj.errors = err.errors.map(el => el.message)
     res.status(status).json(errObj)
   } else if (err.name === 'SequelizeUniqueConstraintError') {
     status = 400
-    errObj.err = err.name
+    errObj.msg = 'Bad Request'
     errObj.errors = 'Email has already been taken'
     res.status(status).json(errObj)
   } else if (err.msg) {
@@ -16,7 +16,7 @@ module.exports = (err, req, res, next) => {
     res.status(status).json(err)
   } else if (!err.length) {
     status = 404
-    errObj.err = 'NOT FOUND'
+    errObj.msg = 'NOT FOUND'
     errObj.errors = 'DATA NOT FOUND'
     res.status(status).json(errObj)
   } else {

@@ -4,6 +4,7 @@ if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
 const express = require('express')
 const app = express()
 const cors = require('cors')
+const routes = require('./router')
 const ownerRoutes = require('./router/owner')
 const warungRoutes = require('./router/warung')
 const errorHandler = require('./middlewares/errorHandler')
@@ -13,11 +14,11 @@ app.use(cors())
 
 app.get('/', (req, res) => {
   res.status(200).json({
-    msg: "Home Page"
+    msg: 'Home Page'
   })
 })
 
-app.use('/owner', ownerRoutes)
+app.use('/', routes)
 
 app.use('/warung', warungRoutes)
 
