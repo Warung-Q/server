@@ -5,8 +5,6 @@ const express = require('express')
 const app = express()
 const cors = require('cors')
 const routes = require('./router')
-const ownerRoutes = require('./router/owner')
-const warungRoutes = require('./router/warung')
 const errorHandler = require('./middlewares/errorHandler')
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
@@ -19,8 +17,6 @@ app.get('/', (req, res) => {
 })
 
 app.use('/', routes)
-
-app.use('/warung', warungRoutes)
 
 app.use(errorHandler)
 
