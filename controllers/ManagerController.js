@@ -14,7 +14,6 @@ class OwnerController {
         res.status(201).json(data)
       })
       .catch(err => {
-        // console.log(err)
         next(err)
       })
   }
@@ -39,7 +38,6 @@ class OwnerController {
               },
               private_key
             )
-
             res.status(200).json({
               email: data.email,
               access_token

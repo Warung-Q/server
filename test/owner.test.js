@@ -1,9 +1,9 @@
 const request = require('supertest')
 const app = require('../app')
 const Sequelize = require('sequelize')
-const { Owner, sequelize } = require('../models')
+const jwt = require('jsonwebtoken')
+const { Owner, Warung, sequelize } = require('../models')
 const { queryInterface } = sequelize
-
 describe('Owner Register', () => {
   afterAll(done => {
     queryInterface
@@ -50,6 +50,41 @@ describe('Owner Register', () => {
           expect(response.body).toHaveProperty('errors', [
             'username cannot be empty'
           ])
+          expect(response.status).toBe(400)
+          done()
+        })
+    })
+  })
+
+  describe('owner register failed invalid username', () => {
+    beforeAll(done => {
+      Owner.create({
+        username: 'fakhran',
+        email: 'fakhran@mail.com',
+        password: 'fakhran123'
+      })
+        .then(data => {
+          done()
+        })
+        .catch(err => {
+          done(err)
+        })
+    })
+    test('should return status 400', done => {
+      request(app)
+        .post('/owner/register')
+        .send({
+          username: 'fakhran',
+          email: 'fakhran@mail.com',
+          password: 'fakhran123'
+        })
+        .end((err, response) => {
+          expect(err).toBe(null)
+          expect(response.body).toHaveProperty(
+            'errors',
+            'Email has already been taken'
+          )
+          expect(response.body).toHaveProperty('msg', 'Bad Request')
           expect(response.status).toBe(400)
           done()
         })
@@ -105,6 +140,19 @@ describe('Owner Login', () => {
       password: 'yufi123'
     })
       .then(result => {
+        idOwnerTemp = result.id
+        email = result.email
+        return Warung.create({
+          name: 'warung sepatan',
+          OwnerId: idOwnerTemp
+        })
+      })
+      .then(data => {
+        let payload = {
+          id: idOwnerTemp,
+          email,
+          WarungId: data.id
+        }
         done()
       })
       .catch(err => {
