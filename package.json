@@ -4,7 +4,7 @@
   "description": "server for Warung-Q",
   "main": "index.js",
   "scripts": {
-    "test": "NODE_ENV=development jest --detectOpenHandles --runInBand --coverage",
+    "test": "NODE_ENV=test jest --detectOpenHandles --runInBand --coverage",
     "dev": "NODE_ENV=development nodemon ./bin/http.js",
     "start": "nodemon ./bin/http.js"
   },
