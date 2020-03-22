@@ -1,32 +1,51 @@
 const request = require('supertest')
 const app = require('../app')
-const { Manager, sequelize, Product } = require('../models')
+const { Owner, Warung, sequelize, Product } = require('../models')
 const { queryInterface } = sequelize
 const jwt = require('jsonwebtoken')
-let access_token, access_token_2
+let access_token, email
+let idOwnerTemp, idWarungTemp
+const private_key = process.env.PRIVATEKEY
 
 describe('Product test route', () => {
   beforeAll(done => {
-    const managers = [
-      {
-        username: 'fakhran',
-        email: 'fakhran@mail.com',
-        password: 'fakhran123'
-      },
-      {
-        username: 'user',
-        email: 'yufi@mail.com',
-        password: '123456'
-      }
-    ]
-
-    Manager.bulkCreate(managers)
+    Owner.create({
+      username: 'fakhran',
+      email: 'fakhran@mail.com',
+      password: 'fakhran123'
+    })
       .then(result => {
-        const payload1 = { id: result[0].id, WarungId: 1 }
-        const payload2 = { id: result[1].id, WarungId: 2 }
-        access_token = jwt.sign(payload1, process.env.PRIVATEKEY)
-        access_token_2 = jwt.sign(payload2, process.env.PRIVATEKEY)
-        console.log(access_token, ' dari before all')
+        idOwnerTemp = result.id
+        email = result.email
+        return Warung.create({
+          name: 'warung sepatan',
+          OwnerId: idOwnerTemp
+        })
+      })
+      .then(data => {
+        idWarungTemp = data.id
+        let payload = {
+          id: idOwnerTemp,
+          email,
+          WarungId: data.id
+        }
+        access_token = jwt.sign(
+          {
+            payload
+          },
+          private_key
+        )
+        done()
+      })
+      .catch(err => {
+        done(err)
+      })
+  })
+
+  afterAll(done => {
+    queryInterface
+      .bulkDelete('Warungs', {})
+      .then(data => {
         done()
       })
       .catch(err => {
@@ -47,7 +66,7 @@ describe('Product test route', () => {
 
   afterAll(done => {
     queryInterface
-      .bulkDelete('Managers', {})
+      .bulkDelete('Owners', {})
       .then(result => {
         done()
       })
@@ -61,7 +80,7 @@ describe('Product test route', () => {
       test('It should return data new product with status 201', done => {
         request(app)
           .post('/products')
-          .set('token', access_token)
+          .set('access_token', access_token)
           .send({
             name: 'sunlight',
             price: 5000,
@@ -77,7 +96,7 @@ describe('Product test route', () => {
             expect(response.body.product).toHaveProperty('name', 'sunlight')
             expect(response.body.product).toHaveProperty('price', 5000)
             expect(response.body.product).toHaveProperty('stock', 15)
-            expect(response.body.product).toHaveProperty('WarungId', 1)
+            expect(response.body.product).toHaveProperty('WarungId')
             expect(response.body.product).toHaveProperty('barcode', '123891312')
             expect(response.body.product).toHaveProperty('CategoryId', 1)
             expect(response.body).toHaveProperty(
@@ -94,7 +113,7 @@ describe('Product test route', () => {
         test('product name null', done => {
           request(app)
             .post('/products')
-            .set('token', access_token)
+            .set('access_token', access_token)
             .send({
               name: null,
               price: 5000,
@@ -117,7 +136,7 @@ describe('Product test route', () => {
         test('product name empty', done => {
           request(app)
             .post('/products')
-            .set('token', access_token)
+            .set('access_token', access_token)
             .send({
               name: '',
               price: 5000,
@@ -142,7 +161,7 @@ describe('Product test route', () => {
         test('price null', done => {
           request(app)
             .post('/products')
-            .set('token', access_token)
+            .set('access_token', access_token)
             .send({
               name: 'sunlight',
               price: null,
@@ -165,7 +184,7 @@ describe('Product test route', () => {
         test('price empty', done => {
           request(app)
             .post('/products')
-            .set('token', access_token)
+            .set('access_token', access_token)
             .send({
               name: 'sunlight',
               price: '',
@@ -188,12 +207,13 @@ describe('Product test route', () => {
         test('price negative', done => {
           request(app)
             .post('/products')
-            .set('token', access_token)
+            .set('access_token', access_token)
             .send({
               name: 'sunlight',
               price: -10000,
               stock: 15,
-              barocode: '123891312',
+              expired_date: new Date(),
+              barcode: '123891312',
               CategoryId: 1
             })
             .end((err, response) => {
@@ -212,7 +232,7 @@ describe('Product test route', () => {
         test('stock null', done => {
           request(app)
             .post('/products')
-            .set('token', access_token)
+            .set('access_token', access_token)
             .send({
               name: 'sunlight',
               price: 5000,
@@ -235,7 +255,7 @@ describe('Product test route', () => {
         test('stock empty', done => {
           request(app)
             .post('/products')
-            .set('token', access_token)
+            .set('access_token', access_token)
             .send({
               name: 'sunlight',
               price: 5000,
@@ -259,7 +279,7 @@ describe('Product test route', () => {
         test('stock negative', done => {
           request(app)
             .post('/products')
-            .set('token', access_token)
+            .set('access_token', access_token)
             .send({
               name: 'sunlight',
               price: 10000,
@@ -284,7 +304,7 @@ describe('Product test route', () => {
         test('barcode null', done => {
           request(app)
             .post('/products')
-            .set('token', access_token)
+            .set('access_token', access_token)
             .send({
               name: 'sunlight',
               price: 5000,
@@ -307,7 +327,7 @@ describe('Product test route', () => {
         test('barcode empty', done => {
           request(app)
             .post('/products')
-            .set('token', access_token)
+            .set('access_token', access_token)
             .send({
               name: 'sunlight',
               price: 5000,
@@ -332,7 +352,7 @@ describe('Product test route', () => {
         test('category null', done => {
           request(app)
             .post('/products')
-            .set('token', access_token)
+            .set('access_token', access_token)
             .send({
               name: 'sunlight',
               price: 5000,
@@ -355,7 +375,7 @@ describe('Product test route', () => {
         test('category empty', done => {
           request(app)
             .post('/products')
-            .set('token', access_token)
+            .set('access_token', access_token)
             .send({
               name: 'sunlight',
               price: 5000,
@@ -375,11 +395,34 @@ describe('Product test route', () => {
             })
         })
       })
+
+      describe('fail in expired date', () => {
+        test('category null', done => {
+          request(app)
+            .post('/products')
+            .set('access_token', access_token)
+            .send({
+              name: 'sunlight',
+              price: 5000,
+              stock: 15,
+              expired_date: '2020-03-21',
+              barcode: '123891312',
+              CategoryId: 1
+            })
+            .end((err, response) => {
+              expect(err).toBe(null)
+              expect(response.body).toHaveProperty('msg', 'Bad Request')
+              expect(response.body).toHaveProperty('errors', ['invalid date'])
+              expect(response.status).toBe(400)
+              done()
+            })
+        })
+      })
     })
   })
 
   describe('Test for product update', () => {
-    let id
+    let id, wrongId
     beforeEach(done => {
       Product.create({
         name: 'sunlight',
@@ -387,7 +430,7 @@ describe('Product test route', () => {
         stock: 15,
         expired_date: new Date(),
         barcode: '123891312',
-        WarungId: 1,
+        WarungId: idWarungTemp,
         CategoryId: 1
       })
         .then(result => {
@@ -398,11 +441,29 @@ describe('Product test route', () => {
           done(err)
         })
     })
+    beforeEach(done => {
+      Product.create({
+        name: 'sunlight',
+        price: 5000,
+        stock: 15,
+        expired_date: new Date(),
+        barcode: '123891312',
+        WarungId: 100,
+        CategoryId: 1
+      })
+        .then(result => {
+          wrongId = result.id
+          done()
+        })
+        .catch(err => {
+          done(err)
+        })
+    })
     describe('Case Update Product Success', () => {
       test(' (Put) it should return msg success with status 1', done => {
         request(app)
           .put(`/products/${id}`)
-          .set('token', access_token)
+          .set('access_token', access_token)
           .send({
             name: 'sunlight merah',
             price: 5000,
@@ -427,7 +488,7 @@ describe('Product test route', () => {
       test(' (Patch) it should return msg success with status 1', done => {
         request(app)
           .patch(`/products/${id}`)
-          .set('token', access_token)
+          .set('access_token', access_token)
           .send({
             stock: 15
           })
@@ -445,25 +506,27 @@ describe('Product test route', () => {
     })
 
     describe('Case Update Product failed', () => {
-      test('(put) fail in wrong product id', done => {
+      test('(put) unautorized', done => {
         request(app)
-          .put(`/products/${id + 100}`)
-          .set('token', access_token)
+          .put(`/products/${wrongId}`)
+          .set('access_token', access_token)
           .send({
             name: 'sunlight merah',
             price: 5000,
             stock: 15,
             expired_date: new Date(),
             barcode: '123891312',
-            WarungId: 1,
             CategoryId: 1
           })
           .end((err, response) => {
             expect(err).toBe(null)
-            console.log(response.body, id, 'ini body')
-            expect(response.body).toHaveProperty('status', [0])
-            expect(response.body).toHaveProperty('msg', 'failed update product')
-            expect(response.status).toBe(201)
+            console.log(response.body)
+            expect(response.body).toHaveProperty(
+              'errors',
+              'YOU ARE NOT AUTHORIZE TO DO THIS ACTION'
+            )
+            expect(response.body).toHaveProperty('msg', 'NOT AUTHORIZED')
+            expect(response.status).toBe(401)
             done()
           })
       })
@@ -471,15 +534,57 @@ describe('Product test route', () => {
       test('(patch) fail in wrong product id', done => {
         request(app)
           .patch(`/products/${id + 100}`)
-          .set('token', access_token)
+          .set('access_token', access_token)
           .send({
             stock: 15
           })
           .end((err, response) => {
             expect(err).toBe(null)
-            expect(response.body).toHaveProperty('status', [0])
-            expect(response.body).toHaveProperty('msg', 'failed update product')
-            expect(response.status).toBe(201)
+            expect(response.body).toHaveProperty('msg', 'NOT FOUND')
+            expect(response.body).toHaveProperty('errors', 'DATA NOT FOUND')
+            expect(response.status).toBe(404)
+            done()
+          })
+      })
+
+      test('(put) fail in stock', done => {
+        request(app)
+          .put(`/products/${id}`)
+          .set('access_token', access_token)
+          .send({
+            name: 'sunlight merah',
+            price: 5000,
+            stock: -15,
+            expired_date: new Date(),
+            barcode: '123891312',
+            WarungId: 1,
+            CategoryId: 1
+          })
+          .end((err, response) => {
+            expect(err).toBe(null)
+            expect(response.body).toHaveProperty('msg', 'Bad Request')
+            expect(response.body).toHaveProperty('errors', [
+              'stock cannot be negative'
+            ])
+            expect(response.status).toBe(400)
+            done()
+          })
+      })
+
+      test('(patch) fail in stock', done => {
+        request(app)
+          .patch(`/products/${id}`)
+          .set('access_token', access_token)
+          .send({
+            stock: -15
+          })
+          .end((err, response) => {
+            expect(err).toBe(null)
+            expect(response.body).toHaveProperty('msg', 'Bad Request')
+            expect(response.body).toHaveProperty('errors', [
+              'stock cannot be negative'
+            ])
+            expect(response.status).toBe(400)
             done()
           })
       })
@@ -487,7 +592,7 @@ describe('Product test route', () => {
       test('not login/ invalid token', done => {
         request(app)
           .put(`/products/${id}`)
-          .set('token', 'empty_token')
+          .set('access_token', 'empty_token')
           .send({
             name: 'sunlight',
             price: 7000,
@@ -518,7 +623,7 @@ describe('Product test route', () => {
         stock: 15,
         expired_date: new Date(),
         barcode: '123891312',
-        WarungId: 1,
+        WarungId: idWarungTemp,
         CategoryId: 1
       })
         .then(result => {
@@ -534,7 +639,7 @@ describe('Product test route', () => {
       test('it should return status 1 with success msg', done => {
         request(app)
           .delete(`/products/${id}`)
-          .set('token', access_token)
+          .set('access_token', access_token)
           .end((err, response) => {
             expect(err).toBe(null)
             expect(response.body).toHaveProperty('status', 1)
@@ -552,7 +657,7 @@ describe('Product test route', () => {
       test('wrong product id', done => {
         request(app)
           .delete(`/products/${id + 1}`)
-          .set('token', access_token)
+          .set('access_token', access_token)
           .end((err, response) => {
             expect(err).toBe(null)
             console.log(response.body, 'body')
@@ -562,22 +667,6 @@ describe('Product test route', () => {
             done()
           })
       })
-    })
-
-    test('not authorized', done => {
-      request(app)
-        .delete(`/products/${id}`)
-        .set('token', another_token)
-        .end((err, response) => {
-          expect(err).toBe(null)
-          expect(response.body).toHaveProperty('msg', 'Bad Request')
-          expect(response.body).toHaveProperty(
-            'errors',
-            'You are not authorized'
-          )
-          expect(response.status).toBe(401)
-          done()
-        })
     })
   })
 
@@ -605,7 +694,7 @@ describe('Product test route', () => {
       test('it should return a product', done => {
         request(app)
           .get(`/products/${id}`)
-          .set('token', access_token)
+          .set('access_token', access_token)
           .end((err, response) => {
             expect(err).toBe(null)
             console.log(response.body, id)
@@ -627,7 +716,7 @@ describe('Product test route', () => {
       test('not login/ invalid token', done => {
         request(app)
           .get(`/products/${id}`)
-          .set('token', 'access_token')
+          .set('access_token', 'access_token')
           .end((err, response) => {
             expect(err).toBe(null)
             expect(response.body).toHaveProperty('msg', 'Forbidden')
@@ -639,15 +728,48 @@ describe('Product test route', () => {
             done()
           })
       })
+
+      test('invalid id', done => {
+        request(app)
+          .get(`/products/${id + 100}`)
+          .set('access_token', access_token)
+          .end((err, response) => {
+            expect(err).toBe(null)
+            console.log(err, 'body')
+            expect(response.body).toHaveProperty('msg', 'NOT FOUND')
+            expect(response.body).toHaveProperty('errors', 'DATA NOT FOUND')
+            expect(response.status).toBe(404)
+            done()
+          })
+      })
     })
   })
 
   describe('Test for findAll product', () => {
+    let id
+    beforeEach(done => {
+      Product.create({
+        name: 'sunlight',
+        price: 5000,
+        stock: 15,
+        expired_date: new Date(),
+        barcode: '123891312',
+        WarungId: 1,
+        CategoryId: 1
+      })
+        .then(result => {
+          id = result.id
+          done()
+        })
+        .catch(err => {
+          done(err)
+        })
+    })
     describe('success find all', () => {
       test('it should return arrary of products', done => {
         request(app)
           .get(`/products`)
-          .set('token', access_token)
+          .set('access_token', access_token)
           .end((err, response) => {
             expect(err).toBe(null)
             expect(response.body).toHaveProperty('products', expect.any(Array))
@@ -660,8 +782,8 @@ describe('Product test route', () => {
     describe('fail find all', () => {
       test('not login/ invalid token', done => {
         request(app)
-          .get(`/products/${id}`)
-          .set('token', 'access_token')
+          .get(`/products/`)
+          .set('access_token', 'access_token')
           .end((err, response) => {
             expect(err).toBe(null)
             expect(response.body).toHaveProperty('msg', 'Forbidden')
