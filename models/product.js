@@ -1,7 +1,11 @@
 'use strict'
 module.exports = (sequelize, DataTypes) => {
+  const validHelper = require('../helpers/validDate')
   class Product extends sequelize.Sequelize.Model {
-    static associate(models) {}
+    static associate(models) {
+      Product.belongsTo(models.Category)
+      Product.hasMany(models.Transaction)
+    }
   }
 
   Product.init(
@@ -104,6 +108,13 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.DATE,
         allowNull: false,
         validate: {
+          isAfter: {
+            args: validHelper(),
+            msg: 'invalid date'
+          },
+          isDate: {
+            msg: 'invalid date'
+          },
           notNull: {
             args: true,
             msg: 'Expired date cannot be null'

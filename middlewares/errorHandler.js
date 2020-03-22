@@ -12,8 +12,17 @@ module.exports = (err, req, res, next) => {
     errObj.errors = 'Email has already been taken'
     res.status(status).json(errObj)
   } else if (err.msg) {
-    status = 404
+    if (err.status) {
+      status = err.status
+    } else {
+      status = 404
+    }
     res.status(status).json(err)
+  } else if (err.name === 'JsonWebTokenError') {
+    status = 403
+    errObj.msg = 'Forbidden'
+    errObj.errors = 'You must login first'
+    res.status(status).json(errObj)
   } else if (!err.length) {
     status = 404
     errObj.msg = 'NOT FOUND'
@@ -21,7 +30,6 @@ module.exports = (err, req, res, next) => {
     res.status(status).json(errObj)
   } else {
     errObj.err = 'INTERNAL SERVER ERROR'
-    errObj.errors = err.errors.map(el => el.message)
     res.status(status).json(errObj)
   }
 }
