@@ -1,11 +1,27 @@
-const { Product } = require('../models')
+const { Product, Category } = require('../models')
 
 class ProductController {
   static findAll(req, res, next) {
-    let WarungId = 1
-    Product.findAll({ where: { WarungId } })
-      .then(products => {
-        res.status(200).json({ products: products })
+    let WarungId = req.WarungId
+    Product.findAll({
+      where: { WarungId },
+      include: Category,
+      order: [['id', 'ASC']]
+    })
+      .then(result => {
+        let output = result.map(el => {
+          return {
+            id: el.id,
+            name: el.name,
+            price: el.price,
+            stock: el.stock,
+            barcode: el.barcode,
+            expired_date: el.expired_date,
+            category: el.Category.name,
+            CategoryId: el.CategoryId
+          }
+        })
+        res.status(200).json({ products: output })
       })
       .catch(err => {
         next(err)
@@ -13,7 +29,7 @@ class ProductController {
   }
 
   static addProduct(req, res, next) {
-    const WarungId = 1
+    const WarungId = req.WarungId
     const { name, stock, price, barcode, CategoryId, expired_date } = req.body
     Product.create({
       name,
@@ -44,9 +60,6 @@ class ProductController {
       { where: { id } }
     )
       .then(result => {
-        if (!result[0]) {
-          msg = 'failed update product'
-        }
         let data = {
           name,
           stock,
@@ -73,9 +86,6 @@ class ProductController {
     const { stock } = req.body
     Product.update({ stock }, { where: { id } })
       .then(result => {
-        if (!result[0]) {
-          msg = 'failed update product'
-        }
         res.status(201).json({ status: result, msg })
       })
       .catch(err => {
@@ -83,31 +93,21 @@ class ProductController {
       })
   }
 
-  static deleteProduct(req, res, next) {
+  static async deleteProduct(req, res, next) {
     const id = +req.params.id
     const msg = 'success delete product'
-    Product.destroy({ where: { id } })
-      .then(result => {
-        if (!result) {
-          msg = 'failed to delete product'
-        }
-        res.status(200).json({ status: result, msg })
-      })
-      .catch(err => {
-        next(err)
-      })
+    let result = await Product.destroy({ where: { id } })
+    res.status(200).json({ status: result, msg })
   }
 
-  static fOne(req, res, next) {
-    console.log('masuk fOne')
+  static async fOne(req, res, next) {
     const id = +req.params.id
-    Product.findOne({ where: { id } })
-      .then(result => {
-        res.status(200).json(result)
-      })
-      .catch(err => {
-        next(err)
-      })
+    let data = await Product.findOne({ where: { id } })
+    if (data) {
+      res.status(200).json(data)
+    } else {
+      next({ err: 'Not Found' })
+    }
   }
 }
 

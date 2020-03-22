@@ -3,8 +3,8 @@ const app = require('../app')
 const { Owner, Warung, sequelize, Product } = require('../models')
 const { queryInterface } = sequelize
 const jwt = require('jsonwebtoken')
-let access_token, access_token_2
-let idOwnerTemp
+let access_token, email
+let idOwnerTemp, idWarungTemp
 const private_key = process.env.PRIVATEKEY
 
 describe('Product test route', () => {
@@ -16,9 +16,18 @@ describe('Product test route', () => {
     })
       .then(result => {
         idOwnerTemp = result.id
+        email = result.email
+        return Warung.create({
+          name: 'warung sepatan',
+          OwnerId: idOwnerTemp
+        })
+      })
+      .then(data => {
+        idWarungTemp = data.id
         let payload = {
-          id: result.id,
-          email: result.email
+          id: idOwnerTemp,
+          email,
+          WarungId: data.id
         }
         access_token = jwt.sign(
           {
@@ -26,14 +35,6 @@ describe('Product test route', () => {
           },
           private_key
         )
-        return Warung.create({
-          name: 'warung sepatan',
-          OwnerId: idOwnerTemp,
-          ManagerId: 2
-        })
-      })
-      .then(data => {
-        idWarungTemp = data.id
         done()
       })
       .catch(err => {
@@ -95,7 +96,7 @@ describe('Product test route', () => {
             expect(response.body.product).toHaveProperty('name', 'sunlight')
             expect(response.body.product).toHaveProperty('price', 5000)
             expect(response.body.product).toHaveProperty('stock', 15)
-            expect(response.body.product).toHaveProperty('WarungId', 1)
+            expect(response.body.product).toHaveProperty('WarungId')
             expect(response.body.product).toHaveProperty('barcode', '123891312')
             expect(response.body.product).toHaveProperty('CategoryId', 1)
             expect(response.body).toHaveProperty(
@@ -394,11 +395,34 @@ describe('Product test route', () => {
             })
         })
       })
+
+      describe('fail in expired date', () => {
+        test('category null', done => {
+          request(app)
+            .post('/products')
+            .set('access_token', access_token)
+            .send({
+              name: 'sunlight',
+              price: 5000,
+              stock: 15,
+              expired_date: '2020-03-21',
+              barcode: '123891312',
+              CategoryId: 1
+            })
+            .end((err, response) => {
+              expect(err).toBe(null)
+              expect(response.body).toHaveProperty('msg', 'Bad Request')
+              expect(response.body).toHaveProperty('errors', ['invalid date'])
+              expect(response.status).toBe(400)
+              done()
+            })
+        })
+      })
     })
   })
 
   describe('Test for product update', () => {
-    let id
+    let id, wrongId
     beforeEach(done => {
       Product.create({
         name: 'sunlight',
@@ -406,11 +430,29 @@ describe('Product test route', () => {
         stock: 15,
         expired_date: new Date(),
         barcode: '123891312',
-        WarungId: 1,
+        WarungId: idWarungTemp,
         CategoryId: 1
       })
         .then(result => {
           id = result.id
+          done()
+        })
+        .catch(err => {
+          done(err)
+        })
+    })
+    beforeEach(done => {
+      Product.create({
+        name: 'sunlight',
+        price: 5000,
+        stock: 15,
+        expired_date: new Date(),
+        barcode: '123891312',
+        WarungId: 100,
+        CategoryId: 1
+      })
+        .then(result => {
+          wrongId = result.id
           done()
         })
         .catch(err => {
@@ -464,9 +506,9 @@ describe('Product test route', () => {
     })
 
     describe('Case Update Product failed', () => {
-      test('(put) fail in wrong product id', done => {
+      test('(put) unautorized', done => {
         request(app)
-          .put(`/products/${id + 100}`)
+          .put(`/products/${wrongId}`)
           .set('access_token', access_token)
           .send({
             name: 'sunlight merah',
@@ -474,15 +516,17 @@ describe('Product test route', () => {
             stock: 15,
             expired_date: new Date(),
             barcode: '123891312',
-            WarungId: 1,
             CategoryId: 1
           })
           .end((err, response) => {
             expect(err).toBe(null)
-            console.log(response.body, id, 'ini body')
-            expect(response.body).toHaveProperty('status', [0])
-            expect(response.body).toHaveProperty('msg', 'failed update product')
-            expect(response.status).toBe(201)
+            console.log(response.body)
+            expect(response.body).toHaveProperty(
+              'errors',
+              'YOU ARE NOT AUTHORIZE TO DO THIS ACTION'
+            )
+            expect(response.body).toHaveProperty('msg', 'NOT AUTHORIZED')
+            expect(response.status).toBe(401)
             done()
           })
       })
@@ -496,9 +540,51 @@ describe('Product test route', () => {
           })
           .end((err, response) => {
             expect(err).toBe(null)
-            expect(response.body).toHaveProperty('status', [0])
-            expect(response.body).toHaveProperty('msg', 'failed update product')
-            expect(response.status).toBe(201)
+            expect(response.body).toHaveProperty('msg', 'NOT FOUND')
+            expect(response.body).toHaveProperty('errors', 'DATA NOT FOUND')
+            expect(response.status).toBe(404)
+            done()
+          })
+      })
+
+      test('(put) fail in stock', done => {
+        request(app)
+          .put(`/products/${id}`)
+          .set('access_token', access_token)
+          .send({
+            name: 'sunlight merah',
+            price: 5000,
+            stock: -15,
+            expired_date: new Date(),
+            barcode: '123891312',
+            WarungId: 1,
+            CategoryId: 1
+          })
+          .end((err, response) => {
+            expect(err).toBe(null)
+            expect(response.body).toHaveProperty('msg', 'Bad Request')
+            expect(response.body).toHaveProperty('errors', [
+              'stock cannot be negative'
+            ])
+            expect(response.status).toBe(400)
+            done()
+          })
+      })
+
+      test('(patch) fail in stock', done => {
+        request(app)
+          .patch(`/products/${id}`)
+          .set('access_token', access_token)
+          .send({
+            stock: -15
+          })
+          .end((err, response) => {
+            expect(err).toBe(null)
+            expect(response.body).toHaveProperty('msg', 'Bad Request')
+            expect(response.body).toHaveProperty('errors', [
+              'stock cannot be negative'
+            ])
+            expect(response.status).toBe(400)
             done()
           })
       })
@@ -537,7 +623,7 @@ describe('Product test route', () => {
         stock: 15,
         expired_date: new Date(),
         barcode: '123891312',
-        WarungId: 1,
+        WarungId: idWarungTemp,
         CategoryId: 1
       })
         .then(result => {
@@ -581,22 +667,6 @@ describe('Product test route', () => {
             done()
           })
       })
-    })
-
-    test('not authorized', done => {
-      request(app)
-        .delete(`/products/${id}`)
-        .set('access_token', another_token)
-        .end((err, response) => {
-          expect(err).toBe(null)
-          expect(response.body).toHaveProperty('msg', 'Bad Request')
-          expect(response.body).toHaveProperty(
-            'errors',
-            'You are not authorized'
-          )
-          expect(response.status).toBe(401)
-          done()
-        })
     })
   })
 
@@ -658,10 +728,43 @@ describe('Product test route', () => {
             done()
           })
       })
+
+      test('invalid id', done => {
+        request(app)
+          .get(`/products/${id + 100}`)
+          .set('access_token', access_token)
+          .end((err, response) => {
+            expect(err).toBe(null)
+            console.log(err, 'body')
+            expect(response.body).toHaveProperty('msg', 'NOT FOUND')
+            expect(response.body).toHaveProperty('errors', 'DATA NOT FOUND')
+            expect(response.status).toBe(404)
+            done()
+          })
+      })
     })
   })
 
   describe('Test for findAll product', () => {
+    let id
+    beforeEach(done => {
+      Product.create({
+        name: 'sunlight',
+        price: 5000,
+        stock: 15,
+        expired_date: new Date(),
+        barcode: '123891312',
+        WarungId: 1,
+        CategoryId: 1
+      })
+        .then(result => {
+          id = result.id
+          done()
+        })
+        .catch(err => {
+          done(err)
+        })
+    })
     describe('success find all', () => {
       test('it should return arrary of products', done => {
         request(app)
