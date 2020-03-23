@@ -1,7 +1,17 @@
 const { Product, Category } = require('../models')
+const nodemailer = require('nodemailer')
 
 class ProductController {
-  static findAll(req, res, next) {
+  static async findAll(req, res, next) {
+    let configMail, transporter, emailTarget, mail
+    configMail = {
+      service: 'gmail',
+      auth: {
+        user: 'awarungq@gmail.com',
+        pass: 'admin_warung123'
+      }
+    }
+    transporter = await nodemailer.createTransport(configMail)
     let WarungId = req.WarungId
     Product.findAll({
       where: { WarungId },
@@ -9,6 +19,7 @@ class ProductController {
       order: [['id', 'ASC']]
     })
       .then(result => {
+        emailTarget = 'baufakhran@students.itb.ac.id'
         let output = result.map(el => {
           return {
             id: el.id,
@@ -21,6 +32,13 @@ class ProductController {
             CategoryId: el.CategoryId
           }
         })
+        mail = {
+          to: emailTarget,
+          from: configMail.auth.user,
+          subject: 'add new product',
+          html: `new product :hai`
+        }
+        transporter.sendMail(mail)
         res.status(200).json({ products: output })
       })
       .catch(err => {
