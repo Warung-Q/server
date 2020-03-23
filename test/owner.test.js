@@ -23,7 +23,8 @@ describe('Owner Register', () => {
         .send({
           username: 'Dimas',
           email: 'dimas@mail.com',
-          password: 'dimas123'
+          password: 'dimas123',
+          warung_name: 'berkah'
         })
         .end((err, response) => {
           expect(err).toBe(null)

@@ -21,10 +21,6 @@ app.use(
   })
 )
 
-app.get('/', (req, res) => {
-  res.send('home')
-})
-
 app.use('/', routes)
 app.use(errorHandler)
 

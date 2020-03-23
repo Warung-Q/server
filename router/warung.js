@@ -7,12 +7,12 @@ const { authorize } = require('../middlewares/authorization')
 
 router.get('/', WarungController.findAll)
 
-router.post('/add', WarungController.create)
+router.post('/', WarungController.create)
 
-router.get('/edit/:id', WarungController.findOne)
+router.get('/:id', WarungController.findOne)
 
-router.put('/edit/:id', authorize, WarungController.update)
+router.put('/:id', authorize, WarungController.update)
 
-router.delete('/delete/:id', authorize, WarungController.destroy)
+router.delete('/:id', authorize, WarungController.destroy)
 
 module.exports = router
