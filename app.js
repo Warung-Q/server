@@ -26,7 +26,7 @@ app.get('/', (req, res) => {
   res.send('home')
 })
 
-app.get(cron)
+// app.get(cron)
 
 
 app.use('/', routes)

@@ -100,7 +100,7 @@ describe('Warung test route', () => {
   describe('create warung success', () => {
     test('it should return status 201', done => {
       request(app)
-        .post('/warung/add')
+        .post('/warung')
         .set('access_token', access_token)
         .send({
           name: 'Warung Sepatan',
@@ -119,7 +119,7 @@ describe('Warung test route', () => {
   describe('create warung failed', () => {
     test('it should return status 400', done => {
       request(app)
-        .post('/warung/add')
+        .post('/warung')
         .set('access_token', access_token)
         .send({
           name: '',
@@ -129,7 +129,7 @@ describe('Warung test route', () => {
         .end((err, response) => {
           expect(err).toBe(null)
           expect(response.body).toHaveProperty('errors', [
-            'name cannot be empty'
+            'warung name cannot be empty'
           ])
           expect(response.status).toBe(400)
           done()
@@ -140,7 +140,7 @@ describe('Warung test route', () => {
   describe('find one warung success', () => {
     test('it should return status 200', done => {
       request(app)
-        .get('/warung/edit/' + idWarungTemp)
+        .get('/warung/' + idWarungTemp)
         .set('access_token', access_token)
         .end((err, response) => {
           expect(err).toBe(null)
@@ -154,7 +154,7 @@ describe('Warung test route', () => {
   describe('find one warung failed', () => {
     test('it should return status 404', done => {
       request(app)
-        .get('/warung/edit/' + 93025)
+        .get('/warung/' + 93025)
         .set('access_token', access_token)
         .end((err, response) => {
           expect(err).toBe(null)
@@ -168,7 +168,7 @@ describe('Warung test route', () => {
   describe('update warung success', () => {
     test('it should return status 201', done => {
       request(app)
-        .put('/warung/edit/' + idWarungTemp)
+        .put('/warung/' + idWarungTemp)
         .set('access_token', access_token)
         .send({
           name: 'Warung Hacktiv8',
@@ -190,7 +190,7 @@ describe('Warung test route', () => {
   describe('update warung failed', () => {
     test('it should return status 400', done => {
       request(app)
-        .put('/warung/edit/' + idWarungTemp)
+        .put('/warung/' + idWarungTemp)
         .set('access_token', access_token)
         .send({
           name: '',
@@ -200,7 +200,7 @@ describe('Warung test route', () => {
         .end((err, response) => {
           expect(err).toBe(null)
           expect(response.body).toHaveProperty('errors', [
-            'name cannot be empty'
+            'warung name cannot be empty'
           ])
           expect(response.status).toBe(400)
           done()
@@ -211,7 +211,7 @@ describe('Warung test route', () => {
   describe('delete warung success', () => {
     test('it should return status 200', done => {
       request(app)
-        .delete('/warung/delete/' + idWarungTemp)
+        .delete('/warung/' + idWarungTemp)
         .set('access_token', access_token)
         .end((err, response) => {
           expect(err).toBe(null)

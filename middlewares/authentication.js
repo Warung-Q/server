@@ -15,12 +15,11 @@ module.exports = {
         include: Warung
       }).then(data => {
         if (data) {
-          console.log('masuk data')
+          req.warung_name = data.Warung.name
           req.WarungId = data.Warung.id
           req.OwnerId = data.id
           next()
         } else {
-          console.log('masuk')
           next({
             status: 403,
             msg: 'You Must Login First'

@@ -1,25 +1,14 @@
 const { Product, Category } = require('../models')
-const nodemailer = require('nodemailer')
 
 class ProductController {
   static async findAll(req, res, next) {
-    let configMail, transporter, emailTarget, mail
-    configMail = {
-      service: 'gmail',
-      auth: {
-        user: 'awarungq@gmail.com',
-        pass: 'admin_warung123'
-      }
-    }
-    transporter = await nodemailer.createTransport(configMail)
-    let WarungId = req.WarungId
+    const WarungId = req.WarungId
     Product.findAll({
       where: { WarungId },
       include: Category,
       order: [['id', 'ASC']]
     })
       .then(result => {
-        emailTarget = 'baufakhran@students.itb.ac.id'
         let output = result.map(el => {
           return {
             id: el.id,
@@ -29,16 +18,11 @@ class ProductController {
             barcode: el.barcode,
             expired_date: el.expired_date,
             category: el.Category.name,
-            CategoryId: el.CategoryId
+            CategoryId: el.CategoryId,
+            createdAt: el.createdAt,
+            updatedAt: el.updatedAt
           }
         })
-        mail = {
-          to: emailTarget,
-          from: configMail.auth.user,
-          subject: 'add new product',
-          html: `new product :hai`
-        }
-        transporter.sendMail(mail)
         res.status(200).json({ products: output })
       })
       .catch(err => {
@@ -120,7 +104,7 @@ class ProductController {
 
   static async fOne(req, res, next) {
     const id = +req.params.id
-    let data = await Product.findOne({ where: { id } })
+    let data = await Product.findOne({ where: { id }, include: Category })
     if (data) {
       res.status(200).json(data)
     } else {

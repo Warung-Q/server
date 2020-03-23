@@ -1,9 +1,27 @@
 const { sequelize, Transaction, Product } = require('../models')
+const nodemailer = require('nodemailer')
 
 class TransactionController {
-  static addTransaction(req, res, next) {
-    const { carts } = req.body
+  static async addTransaction(req, res, next) {
+    const { carts, email } = req.body
+    let total = 0
     let WarungId = req.WarungId
+    let configMail, transporter, emailTarget, mail
+    configMail = {
+      service: 'gmail',
+      auth: {
+        user: 'awarungq@gmail.com',
+        pass: 'admin_warung123'
+      }
+    }
+    transporter = await nodemailer.createTransport(configMail)
+
+    if (email) {
+      emailTarget = email
+    } else {
+      emailTarget = 'baufakhran@gmail.com'
+    }
+
     sequelize
       .transaction(t => {
         const promises = []
@@ -12,11 +30,15 @@ class TransactionController {
             where: { id: el.ProductId },
             transaction: t
           })
+          total += el.total_price
           promises.push(newPromise)
         })
         return Promise.all(promises).then(products => {
           const updatePromises = []
           products.forEach((el, index) => {
+            carts.forEach(cart => {
+              cart.name = el.name
+            })
             const data = {
               stock: el.stock - carts[index].quantity
             }
@@ -40,9 +62,21 @@ class TransactionController {
         })
       })
       .then(result => {
-        res.status(201).json(result)
+        let str = ''
+        result.forEach((el, index) => {
+          str += `${index + 1}. ${el.name}  ${el.total_price} <br>`
+        })
+        mail = {
+          to: emailTarget,
+          from: 'admin Warung Q',
+          subject: 'Transaction',
+          html: `<b>product transaction:</b><br>${str}<br><b>Total : </b>${total}`
+        }
+        transporter.sendMail(mail)
+        res.status(201).json({ result, total })
       })
       .catch(err => {
+        console.log(err)
         next(err)
       })
   }
@@ -54,7 +88,6 @@ class TransactionController {
         res.status(200).json(result)
       })
       .catch(err => {
-        console.log(err)
         next(err)
       })
   }
