@@ -1,4 +1,4 @@
-const { Owner, Warung } = require('../models')
+const { sequelize, Owner, Warung } = require('../models')
 const jwt = require('jsonwebtoken')
 const private_key = process.env.PRIVATEKEY
 const bcrypt = require('../helpers/bcrypt')
@@ -8,24 +8,33 @@ const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy
 
 class OwnerController {
   static async register(req, res, next) {
-    try {
-      const data = await Owner.create({
-        username: req.body.username,
-        email: req.body.email,
-        password: req.body.password
+    let { username, password, email, warung_name } = req.body
+    sequelize
+      .transaction(t => {
+        return Owner.create(
+          { username, password, email },
+          { transaction: t }
+        ).then(data => {
+          return Warung.create(
+            {
+              name: warung_name,
+              OwnerId: data.id
+            },
+            { transaction: t }
+          )
+        })
       })
-      const warung = await Warung.create({
-        name: `warung ${data.username}`,
-        OwnerId: data.id
+      .then(warung => {
+        res.status(201).json({
+          username,
+          email,
+          password,
+          warung_name: warung.name
+        })
       })
-      const { name } = warung
-      const { email, username } = data
-      res
-        .status(201)
-        .json({ username, email, password: req.body.password, warung: name })
-    } catch (err) {
-      next(err)
-    }
+      .catch(err => {
+        next(err)
+      })
   }
 
   static login(req, res, next) {

@@ -1,11 +1,12 @@
-const { Warung } = require('../models')
+const { Warung, Product } = require('../models')
 
 class WarungController {
   static findAll(req, res, next) {
     Warung.findAll({
       where: {
         OwnerId: req.OwnerId
-      }
+      },
+      include: Product
     })
       .then(data => {
         res.status(200).json(data)
@@ -33,7 +34,8 @@ class WarungController {
     Warung.findOne({
       where: {
         id: req.params.id
-      }
+      },
+      include: Product
     })
       .then(data => {
         if (data) {
@@ -74,7 +76,7 @@ class WarungController {
       })
   }
 
-  static async destroy(req, res, next) {
+  static destroy(req, res, next) {
     Warung.destroy({
       where: {
         id: req.params.id
