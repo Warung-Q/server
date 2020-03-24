@@ -774,7 +774,7 @@ none
 
 # CATEGORY Routes
 
-## **find All News**
+## **find All Categories**
 
 Returns json data about products
 
