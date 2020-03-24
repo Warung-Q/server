@@ -6,6 +6,7 @@ class TransactionController {
     const { carts, email } = req.body
     let total = 0
     let WarungId = req.WarungId
+    let warung_name = req.warung_name
     let configMail, transporter, emailTarget, mail
     configMail = {
       service: 'gmail',
@@ -30,9 +31,7 @@ class TransactionController {
         return Promise.all(promises).then(products => {
           const updatePromises = []
           products.forEach((el, index) => {
-            carts.forEach(cart => {
-              cart.name = el.name
-            })
+            carts[index].name = el.name
             const data = {
               stock: el.stock - carts[index].quantity
             }
@@ -58,16 +57,20 @@ class TransactionController {
       .then(result => {
         let str = ''
         result.forEach((el, index) => {
-          str += `${index + 1}. ${el.name}  ${el.total_price} <br>`
+          str += `${index + 1}. ${el.name} - ${
+            el.quantity
+          } - Rp ${el.total_price.toLocaleString('id-ID')} <br>`
         })
         if (email) {
+          total = total.toLocaleString('id-ID')
           emailTarget = email
           mail = {
             to: emailTarget,
             from: 'admin Warung Q',
-            subject: 'Transaction',
-            html: `<b>product transaction:</b><br>${str}<br><b>Total : </b>${total}`
+            subject: `Transaction Receips in ${warung_name} store`,
+            html: `<b>Product transaction:</b><br>${str}<br><b>Total : </b> Rp ${total}<br> Thank you for your transaction in ${warung_name} store, we hope you enjoyed with our services`
           }
+          console.log(str)
           transporter.sendMail(mail)
         }
         res.status(201).json({ result, total })
