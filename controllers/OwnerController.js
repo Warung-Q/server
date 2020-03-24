@@ -61,6 +61,8 @@ class OwnerController {
               private_key
             )
             res.status(200).json({
+              warung_name: data.Warung.name,
+              username: data.username,
               email: data.email,
               access_token
             })

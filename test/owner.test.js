@@ -213,4 +213,42 @@ describe('Owner Login', () => {
         })
     })
   })
+
+  describe('login failed', () => {
+    test('should return status 400 with message invalid email/password', done => {
+      request(app)
+        .post('/owner/login')
+        .send({
+          email: 'yufi@mail.com',
+          password: 'yufids123'
+        })
+        .end((err, response) => {
+          expect(err).toBe(null)
+          expect(response.body).toHaveProperty('msg', 'login failed')
+          expect(response.body).toHaveProperty(
+            'errors',
+            'invalid email or password'
+          )
+          expect(response.status).toBe(404)
+          done()
+        })
+    })
+  })
+
+  describe('login failed', () => {
+    test('should return status 400 with message invalid email/password', done => {
+      request(app)
+        .post('/owner/login')
+        .send({
+          password: 'yufids123'
+        })
+        .end((err, response) => {
+          expect(err).toBe(null)
+          expect(response.body).toHaveProperty('msg', 'NOT FOUND')
+          expect(response.body).toHaveProperty('errors', 'DATA NOT FOUND')
+          expect(response.status).toBe(404)
+          done()
+        })
+    })
+  })
 })

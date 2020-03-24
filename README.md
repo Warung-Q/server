@@ -85,8 +85,10 @@ Returns json data about products
 
     ```json
     {
+      "warung_name": "warung berkah",
+      "username": "bau fakhran",
       "email": "bau@mail.com",
-      "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXlsb2FkIjp7ImlkIjoxMCwiZW1haWwiOiJiYXVAbWFpbC5jb20iLCJXYXJ1bmdJZCI6OH0sImlhdCI6MTU4NDk0Nzk3MX0.-Kt90v22Ef_ttr7unraeJS8vPOICIQ4FlY6jZOSDSbg"
+      "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXlsb2FkIjp7ImlkIjoxMCwiZW1haWwiOiJiYXVAbWFpbC5jb20iLCJXYXJ1bmdJZCI6OH0sImlhdCI6MTU4NTAwNzAxNX0.N-GMWHKuNaUlBtEADrjDIPHkIV_Vyx6fSd-zfnzr3L0"
     }
     ```
 

@@ -22,12 +22,7 @@ app.use(
   })
 )
 
-app.get('/', (req, res) => {
-  res.send('home')
-})
-
 // app.get(cron)
-
 
 app.use('/', routes)
 app.use(errorHandler)
