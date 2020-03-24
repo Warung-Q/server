@@ -16,12 +16,6 @@ class TransactionController {
     }
     transporter = await nodemailer.createTransport(configMail)
 
-    if (email) {
-      emailTarget = email
-    } else {
-      emailTarget = 'baufakhran@gmail.com'
-    }
-
     sequelize
       .transaction(t => {
         const promises = []
@@ -66,17 +60,19 @@ class TransactionController {
         result.forEach((el, index) => {
           str += `${index + 1}. ${el.name}  ${el.total_price} <br>`
         })
-        mail = {
-          to: emailTarget,
-          from: 'admin Warung Q',
-          subject: 'Transaction',
-          html: `<b>product transaction:</b><br>${str}<br><b>Total : </b>${total}`
+        if (email) {
+          emailTarget = email
+          mail = {
+            to: emailTarget,
+            from: 'admin Warung Q',
+            subject: 'Transaction',
+            html: `<b>product transaction:</b><br>${str}<br><b>Total : </b>${total}`
+          }
+          transporter.sendMail(mail)
         }
-        transporter.sendMail(mail)
         res.status(201).json({ result, total })
       })
       .catch(err => {
-        console.log(err)
         next(err)
       })
   }

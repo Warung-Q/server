@@ -16,7 +16,7 @@ module.exports = {
       }).then(data => {
         if (data) {
           req.warung_name = data.Warung.name
-          req.WarungId = data.Warung.id
+          req.WarungId = decoded.payload.WarungId
           req.OwnerId = data.id
           next()
         } else {

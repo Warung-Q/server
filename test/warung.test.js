@@ -225,17 +225,50 @@ describe('Warung test route', () => {
     })
   })
 
-  // describe('delete warung failed', () => {
-  //     test.only('it should return status 400', done => {
-  //         request(app)
-  //         .delete('/warung/delete/' + 98552)
-  //         .set('access_token', access_token)
-  //         .end((err, response) => {
-  //             expect(err).toBe(null)
-  //             console.log(response.body, "<<<<<<<<<<<<")
-  //             expect(response.status).toBe(400)
-  //             done()
-  //         })
-  //     })
-  // })
+  describe('delete warung failed', () => {
+    test('it should return status 401', done => {
+      request(app)
+        .delete('/warung/' + 98552)
+        .set('access_token', access_token)
+        .end((err, response) => {
+          expect(err).toBe(null)
+          expect(response.status).toBe(401)
+          done()
+        })
+    })
+  })
+
+  describe('delete warung failed', () => {
+    let idwar
+    beforeAll(async done => {
+      Warung.create({
+        name: 'warung sepatan',
+        OwnerId: 1021,
+        ManagerId: 2
+      })
+        .then(data => {
+          idwar = +data.id
+          done()
+        })
+        .catch(err => {
+          done()
+        })
+    })
+    test('it should return status 400', done => {
+      request(app)
+        .delete('/warung/' + idwar)
+        .set('access_token', access_token)
+        .end((err, response) => {
+          expect(err).toBe(null)
+          console.log(response.body, idwar, '<<<<<<<<<<<<')
+          expect(response.body).toHaveProperty(
+            'errors',
+            'YOU ARE NOT AUTHORIZE TO DO THIS ACTION'
+          )
+          expect(response.body).toHaveProperty('msg', 'NOT AUTHORIZED')
+          expect(response.status).toBe(401)
+          done()
+        })
+    })
+  })
 })
