@@ -802,22 +802,28 @@ Returns json data about products
   ```json
   [
     {
-      "id": 1,
-      "name": "makanan",
-      "createdAt": "2020-03-22T02:25:54.666Z",
-      "updatedAt": "2020-03-22T02:25:54.666Z"
+        "id": 1,
+        "name": "makanan",
+        "createdAt": "2020-03-23T02:21:34.492Z",
+        "updatedAt": "2020-03-23T02:21:34.492Z"
     },
     {
-      "id": 2,
-      "name": "minuman",
-      "createdAt": "2020-03-22T02:25:54.666Z",
-      "updatedAt": "2020-03-22T02:25:54.666Z"
+        "id": 2,
+        "name": "minuman",
+        "createdAt": "2020-03-23T02:21:34.492Z",
+        "updatedAt": "2020-03-23T02:21:34.492Z"
     },
     {
-      "id": 3,
-      "name": "perlengkapan rumah tangga",
-      "createdAt": "2020-03-22T02:25:54.666Z",
-      "updatedAt": "2020-03-22T02:25:54.666Z"
+        "id": 3,
+        "name": "perlengkapan rumah tangga",
+        "createdAt": "2020-03-23T02:21:34.492Z",
+        "updatedAt": "2020-03-23T02:21:34.492Z"
+    },
+    {
+        "id": 4,
+        "name": "alat kantor",
+        "createdAt": "2020-03-23T08:02:49.367Z",
+        "updatedAt": "2020-03-23T08:02:49.367Z"
     }
   ]
   ```
