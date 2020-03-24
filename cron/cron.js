@@ -1,38 +1,89 @@
 const cron = require('node-cron')
 const {
-    Product
+    Product,
+    Category,
+    Warung,
+    Owner
 } = require('../models')
+const nodemailer = require('nodemailer')
 
 function cron_expired() {
     let date1;
     let date2 = new Date()
-    cron.schedule('0 0 * * *', () => {
+    cron.schedule('0 0 * * *', () => { //cron running daily
         // console.log('cron running daily')
-        Product.findAll({
-            // where: {
-            //     WarungId: req.WarungId
-            // }
+        Warung.findAll({
+            include: [{
+                model: Product
+            }, {
+                model: Owner
+            }],
+            order: [['id', 'ASC']]
         })
             .then(result => {
-                let output = result.map(el => {
-                    date1 = new Date(el.expired_date)
-                    let diffTime = date1.getTime() - date2.getTime() //date calculation in time
-                    let diffDay = Math.ceil(diffTime / (1000 * 3600 * 24)) //date calucalation in days
-                    if(diffDay <= 14){
-                        return {
-                            id: el.id,
-                            name: el.name,
-                            price: el.price,
-                            stock: el.stock,
-                            barcode: el.barcode,
-                            expired_date: el.expired_date,
-                            category: el.Category.name,
-                            CategoryId: el.CategoryId
-                        }
-                    }
+                let output = []
+                result.forEach(el => {
+                    output.push({
+                        name: el.name,
+                        OwnerId: el.OwnerId,
+                        ManagerId: el.ManagerId,
+                        OwnerName: el.Owner.dataValues.username,
+                        OwnerEmail: el.Owner.dataValues.email,
+                        Products: el.Products.map(product => {
+                            date1 = product.expired_date
+                            let diffTime = date1.getTime() - date2.getTime() //date calculation in time
+                            let diffDay = Math.ceil(diffTime / (1000 * 3600 * 24)) //date calucalation in days
+                            if(diffDay <= 14 && diffDay > 0 && product.stock > 0) {
+                                return({
+                                    id: product.dataValues.id,
+                                    name: product.dataValues.name,
+                                    price: product.dataValues.price,
+                                    stock: product.dataValues.stock,
+                                    barcode: product.dataValues.barcode,
+                                    expired_date: product.dataValues.expired_date,
+                                    CategoryId: product.dataValues.CategoryId,
+                                    WarungId: product.dataValues.WarungId
+                                })
+                            } else {
+                                return
+                            }
+                        })
+                    })
                 })
                 console.log(output)
+
                 //send output to email via nodemailer here
+                let configMail, transporter, emailTarget, mail
+                configMail = {
+                    service: 'gmail',
+                    auth: {
+                        user: 'awarungq@gmail.com',
+                        pass: 'admin_warung123'
+                    }
+                }
+                transporter = nodemailer.createTransport(configMail)
+
+                output.forEach(list => {
+                    emailTarget = list.OwnerEmail
+                    let productName = []
+                    list.Products.forEach(el => {
+                        if(el !== undefined){
+                            productName.push(el.name)
+                        }
+                    })
+                    if(productName){
+                        mail = {
+                            to: emailTarget,
+                            from: 'admin Warung Q',
+                            subject: 'Expiring Product',
+                            html: `<b>product expiring within less than 2 weeks:</b>
+                            <br>${productName}<br>
+                            <br>Please check your product<br>
+                            `
+                        }
+                        transporter.sendMail(mail)
+                    }
+                })
             })
             .catch(err => {
                 console.log(err)
