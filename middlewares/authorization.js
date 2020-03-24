@@ -12,12 +12,18 @@ module.exports = {
           if (data.OwnerId === req.OwnerId) {
             next()
           } else {
-            let err = {
-              name: 'NOT AUTHORIZED',
-              msg: 'YOU ARE NOT AUTHORIZE TO DO THIS ACTION'
-            }
-            next(err)
+            next({
+              status: 401,
+              msg: 'NOT AUTHORIZED',
+              errors: 'YOU ARE NOT AUTHORIZE TO DO THIS ACTION'
+            })
           }
+        } else {
+          next({
+            status: 401,
+            msg: 'NOT AUTHORIZED',
+            errors: 'YOU ARE NOT AUTHORIZE TO DO THIS ACTION'
+          })
         }
       })
       .catch(err => {

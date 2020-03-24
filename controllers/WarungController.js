@@ -76,22 +76,13 @@ class WarungController {
       })
   }
 
-  static destroy(req, res, next) {
-    Warung.destroy({
-      where: {
-        id: req.params.id
-      }
+  static async destroy(req, res, next) {
+    let id = +req.params.id
+    let data = await Warung.destroy({ where: { id } })
+    res.status(200).json({
+      data,
+      msg: 'Warung deleted successfully'
     })
-      .then(data => {
-        if (data) {
-          res.status(200).json({
-            msg: 'Warung deleted successfully'
-          })
-        }
-      })
-      .catch(err => {
-        next(err)
-      })
   }
 }
 

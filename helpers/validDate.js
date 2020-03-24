@@ -5,11 +5,10 @@ module.exports = function getdate() {
   } else {
     date += `-${new Date().getMonth() + 1}`
   }
-  if (new Date().getDay() < 10) {
+  if (new Date().getDate() < 10) {
     date += `-0${new Date().getDate()}`
   } else {
     date += `-${new Date().getDate()}`
   }
-  console.log(date)
   return date
 }
