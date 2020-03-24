@@ -704,13 +704,15 @@ Create new transaction to database
     }
     ```
 
-## **find all transaction**
+# NEWS Routes
+
+## **find All News**
 
 Returns json data about transactions
 
 - **URL**
 
-  /transaction
+  /news
 
 - **Method:**
 
@@ -724,56 +726,98 @@ Returns json data about transactions
 
   none
 
-* **Success Response:**
+- **Success Response:**
 
-  - **Code:** 200 <br />
-    **Content:** `{
+* **Code:** 200 <br />
+  **Content:** `{
 
-    ```json
-    [
-      {
-        "id": 1,
-        "name": null,
-        "ProductId": 1,
-        "quantity": 10,
-        "total_price": 10000,
-        "WarungId": 1,
-        "createdAt": "2020-03-22T02:29:06.817Z",
-        "updatedAt": "2020-03-22T02:29:06.817Z",
-        "Product": {
-          "id": 1,
-          "name": "sunlight hijau",
-          "price": 5000,
-          "stock": 5,
-          "barcode": "123891312",
-          "WarungId": 1,
-          "CategoryId": 1,
-          "expired_date": "2020-03-29T00:00:00.000Z",
-          "createdAt": "2020-03-22T02:27:55.227Z",
-          "updatedAt": "2020-03-22T02:29:06.800Z"
-        }
-      },
-      {
-        "id": 2,
-        "name": null,
-        "ProductId": 2,
-        "quantity": 5,
-        "total_price": 10000,
-        "WarungId": 1,
-        "createdAt": "2020-03-22T02:29:06.818Z",
-        "updatedAt": "2020-03-22T02:29:06.818Z",
-        "Product": {
-          "id": 2,
-          "name": "sunlight merah",
-          "price": 5000,
-          "stock": 10,
-          "barcode": "123891312",
-          "WarungId": 1,
-          "CategoryId": 3,
-          "expired_date": "2020-03-29T00:00:00.000Z",
-          "createdAt": "2020-03-22T02:28:15.462Z",
-          "updatedAt": "2020-03-22T02:29:06.801Z"
-        }
-      }
-    ]
-    ```
+  ```json
+  [
+    {
+      "id": 8,
+      "message": "product expiring within less than 2 weeks:",
+      "WarungId": 8,
+      "createdAt": "2020-03-24T08:32:00.069Z",
+      "updatedAt": "2020-03-24T08:32:00.069Z"
+    }
+  ]
+  ```
+
+## **delete news**
+
+Returns json data about products
+
+- **URL**
+
+/news/:id
+
+- **Method:**
+
+`DELETE`
+
+- **URL Params**
+
+none
+
+- **Data Params**
+
+none
+
+- **Success Response:**
+
+* **Code:** 200 <br />
+  **Content:**
+
+  ```json
+  1
+  ```
+
+# CATEGORY Routes
+
+## **find All News**
+
+Returns json data about products
+
+- **URL**
+
+  /news
+
+- **Method:**
+
+  `GET`
+
+- **URL Params**
+
+  none
+
+- **Data Params**
+
+  none
+
+- **Success Response:**
+
+* **Code:** 200 <br />
+  **Content:** `{
+
+  ```json
+  [
+    {
+      "id": 1,
+      "name": "makanan",
+      "createdAt": "2020-03-22T02:25:54.666Z",
+      "updatedAt": "2020-03-22T02:25:54.666Z"
+    },
+    {
+      "id": 2,
+      "name": "minuman",
+      "createdAt": "2020-03-22T02:25:54.666Z",
+      "updatedAt": "2020-03-22T02:25:54.666Z"
+    },
+    {
+      "id": 3,
+      "name": "perlengkapan rumah tangga",
+      "createdAt": "2020-03-22T02:25:54.666Z",
+      "updatedAt": "2020-03-22T02:25:54.666Z"
+    }
+  ]
+  ```

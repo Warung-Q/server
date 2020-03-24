@@ -4,6 +4,8 @@ const Sequelize = require('sequelize')
 const jwt = require('jsonwebtoken')
 const { Owner, Warung, sequelize } = require('../models')
 const { queryInterface } = sequelize
+const cron = require('../cron/cron')
+
 describe('Owner Register', () => {
   afterAll(done => {
     queryInterface
