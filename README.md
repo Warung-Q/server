@@ -2,7 +2,7 @@
 
 ## **Register Owner**
 
-Returns json data about products
+Owner Register create new owner to database
 
 - **URL**
 
@@ -55,7 +55,7 @@ Returns json data about products
 
 ## **Login Owner**
 
-Returns json data about products
+Owner Login find Owner by email and password
 
 - **URL**
 
@@ -104,11 +104,61 @@ Returns json data about products
     }
     ```
 
+## **Google Login Owner**
+
+Owner login with google
+
+- **URL**
+
+  /owner/google_signin
+
+- **Method:**
+
+  `POST`
+
+- **URL Params**
+
+  None
+
+- **Data Params**
+  ```json
+  {
+    "email": "bau@mail.com",
+    "password": "bau123"
+  }
+  ```
+
+- **Success Response:**
+
+  - **Code:** 200 <br />
+    **Content:** `{
+
+    ```json
+    {
+      "warung_name": "warung berkah",
+      "username": "bau fakhran",
+      "email": "bau@mail.com",
+      "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXlsb2FkIjp7ImlkIjoxMCwiZW1haWwiOiJiYXVAbWFpbC5jb20iLCJXYXJ1bmdJZCI6OH0sImlhdCI6MTU4NTAwNzAxNX0.N-GMWHKuNaUlBtEADrjDIPHkIV_Vyx6fSd-zfnzr3L0"
+    }
+    ```
+
+- **Error Response:**
+
+  - **Code:** 400 <br />
+    **Content:** `{
+
+    ```json
+    {
+      "msg": "login failed",
+      "errors": "invalid email or password"
+    }
+    ```
+
 # Warung Routes
 
 ## **Add Warung**
 
-Returns json data about products
+Create new warung to database
 
 - **URL**
 
@@ -134,7 +184,7 @@ Returns json data about products
 
 - **Success Response:**
 
-  - **Code:** 200 <br />
+  - **Code:** 201 <br />
     **Content:** `{
 
     ```json
@@ -162,7 +212,7 @@ Returns json data about products
 
 ## **FIND All Warung**
 
-Returns json data about products
+Returns json data about warung
 
 - **URL**
 
@@ -170,7 +220,7 @@ Returns json data about products
 
 - **Method:**
 
-  `POST`
+  `GET`
 
 - **URL Params**
 
@@ -214,7 +264,7 @@ Returns json data about products
 
 ## **FIND One Warung**
 
-Returns json data about products
+Returns json of one Warung
 
 - **URL**
 
@@ -222,7 +272,7 @@ Returns json data about products
 
 - **Method:**
 
-  `POST`
+  `GET`
 
 - **URL Params**
 
@@ -264,7 +314,7 @@ Returns json data about products
 
 ## **Update Warung**
 
-Returns json data about products
+Update Warung data by id
 
 - **URL**
 
@@ -301,7 +351,7 @@ Returns json data about products
 
 ## **Delete Warung**
 
-Returns json data about products
+Delete warung data by id
 
 - **URL**
 
@@ -378,7 +428,7 @@ Returns json data about products
 
 ## **Add new Product**
 
-Returns json data about products
+Create new product to database
 
 - **URL**
 
@@ -430,7 +480,7 @@ Returns json data about products
 
 ## **FIND One Product**
 
-Returns json data about products
+Returns json data of one product
 
 - **URL**
 
@@ -476,7 +526,7 @@ Returns json data about products
 
 ## **Update Product**
 
-Returns json data about products
+Update product data by id
 
 - **URL**
 
@@ -517,7 +567,7 @@ Returns json data about products
 
 ## **Update STOCK Product**
 
-Returns json data about products
+Update product stock by id
 
 - **URL**
 
@@ -553,7 +603,7 @@ Returns json data about products
 
 ## **Delete Product**
 
-Returns json data about products
+Delete product by id
 
 - **URL**
 
@@ -587,7 +637,7 @@ Returns json data about products
 
 ## **add transaction**
 
-Returns json data about products
+Create new transaction to database
 
 - **URL**
 
@@ -623,7 +673,7 @@ Returns json data about products
 
 * **Success Response:**
 
-  - **Code:** 200 <br />
+  - **Code:** 201 <br />
     **Content:** `{
 
     ```json
@@ -656,7 +706,7 @@ Returns json data about products
 
 ## **find all transaction**
 
-Returns json data about products
+Returns json data about transactions
 
 - **URL**
 

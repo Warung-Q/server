@@ -3,32 +3,34 @@ const OwnerController = require('../controllers/OwnerController')
 const passport = require('passport')
 const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy
 
-router.use(passport.initialize())
-router.use(passport.session())
+// router.use(passport.initialize())
+// router.use(passport.session())
 
 router.post('/register', OwnerController.register)
 
 router.post('/login', OwnerController.login)
 
-router.get('/authlogin', (req, res) => {
-  res.render('login')
-})
+router.post('/google_signin', OwnerController.googleSignin)
 
-router.get('/login/google', OwnerController.googlePassport)
+// router.get('/authlogin', (req, res) => {
+//   res.render('login')
+// })
 
-router.get(
-  '/return/google',
-  passport.authenticate('google', {
-    failureRedirect: '/authlogin'
-  })
-)
+// router.get('/login/google', OwnerController.googlePassport)
 
-passport.serializeUser(function(user, cb) {
-  cb(null, user)
-})
+// router.get(
+//   '/return/google',
+//   passport.authenticate('google', {
+//     failureRedirect: '/authlogin'
+//   })
+// )
 
-passport.deserializeUser(function(obj, cb) {
-  cb(null, obj)
-})
+// passport.serializeUser(function(user, cb) {
+//   cb(null, user)
+// })
+
+// passport.deserializeUser(function(obj, cb) {
+//   cb(null, obj)
+// })
 
 module.exports = router
