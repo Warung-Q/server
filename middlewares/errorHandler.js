@@ -1,4 +1,6 @@
 module.exports = (err, req, res, next) => {
+  console.log(err)
+
   let errObj = {}
   let status = 500
   if (err.name === 'SequelizeValidationError') {

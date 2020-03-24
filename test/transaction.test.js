@@ -117,7 +117,8 @@ describe('Product test route', () => {
                 quantity: 10,
                 total_price: 10000
               }
-            ]
+            ],
+            email: 'baufakhran@students.itb.ac.id'
           })
           .end((err, response) => {
             expect(err).toBe(null)
