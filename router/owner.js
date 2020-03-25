@@ -5,6 +5,6 @@ router.post('/register', OwnerController.register)
 
 router.post('/login', OwnerController.login)
 
-router.post('/google_signin', OwnerController.googleSignin)
+// router.post('/google_signin', OwnerController.googleSignin)
 
 module.exports = router
