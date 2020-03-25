@@ -6,7 +6,7 @@ const app = express()
 const cors = require('cors')
 const routes = require('./router')
 const errorHandler = require('./middlewares/errorHandler')
-// const cron = require('./cron/cron')
+const cron = require('./cron/cron')
 app.use(express.urlencoded({ extended: false }))
 app.set('view engine', 'ejs')
 app.use(express.json())
@@ -22,7 +22,7 @@ app.use(
   })
 )
 
-// app.get(cron)
+app.get(cron)
 
 app.use('/', routes)
 app.use(errorHandler)
