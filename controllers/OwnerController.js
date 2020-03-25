@@ -83,58 +83,58 @@ class OwnerController {
       })
   }
 
-  static googleSignin(req, res, next) {
-    let payload
-    let token
-    client
-      .verifyIdToken({
-        idToken: req.headers.access_token,
-        audience: process.env.GCLIENTID
-      })
-      .then(result => {
-        payload = result.getPayload()
-        return Owner.findOne({
-          where: {
-            email: payload.email
-          }
-        })
-      })
-      .then(data => {
-        if (!data) {
-          return Owner.create({
-            username: payload.name,
-            email: payload.email,
-            password: process.env.GCLIENTSECRET
-          })
-        } else return data
-      })
-      .then(data => {
-        let payload = {
-          id: data.id,
-          email: data.email,
-          WarungId: data.Warung.id
-        }
-        token = jwt.sign(
-          {
-            payload
-          },
-          private_key
-        )
-        return Warung.create({
-          name: data.username || 'warung-q',
-          OwnerId: data.id
-        })
-      })
-      .then(result => {
-        res.status(200).json({
-          token
-        })
-      })
-      .catch(err => {
-        console.log(err, 'dari error google sign in')
-        next(err)
-      })
-  }
+  // static googleSignin(req, res, next) {
+  //   let payload
+  //   let token
+  //   client
+  //     .verifyIdToken({
+  //       idToken: req.headers.access_token,
+  //       audience: process.env.GCLIENTID
+  //     })
+  //     .then(result => {
+  //       payload = result.getPayload()
+  //       return Owner.findOne({
+  //         where: {
+  //           email: payload.email
+  //         }
+  //       })
+  //     })
+  //     .then(data => {
+  //       if (!data) {
+  //         return Owner.create({
+  //           username: payload.name,
+  //           email: payload.email,
+  //           password: process.env.GCLIENTSECRET
+  //         })
+  //       } else return data
+  //     })
+  //     .then(data => {
+  //       let payload = {
+  //         id: data.id,
+  //         email: data.email,
+  //         WarungId: data.Warung.id
+  //       }
+  //       token = jwt.sign(
+  //         {
+  //           payload
+  //         },
+  //         private_key
+  //       )
+  //       return Warung.create({
+  //         name: data.username || 'warung-q',
+  //         OwnerId: data.id
+  //       })
+  //     })
+  //     .then(result => {
+  //       res.status(200).json({
+  //         token
+  //       })
+  //     })
+  //     .catch(err => {
+  //       console.log(err, 'dari error google sign in')
+  //       next(err)
+  //     })
+  // }
 }
 
 module.exports = OwnerController
