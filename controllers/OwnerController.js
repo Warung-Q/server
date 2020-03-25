@@ -2,11 +2,8 @@ const { sequelize, Owner, Warung } = require('../models')
 const jwt = require('jsonwebtoken')
 const private_key = process.env.PRIVATEKEY
 const bcrypt = require('../helpers/bcrypt')
-const {
-  OAuth2Client
-} = require('google-auth-library');
-const client = new OAuth2Client(process.env.GCLIENTID);
-
+const { OAuth2Client } = require('google-auth-library')
+const client = new OAuth2Client(process.env.GCLIENTID)
 
 class OwnerController {
   static async register(req, res, next) {
@@ -89,50 +86,54 @@ class OwnerController {
   static googleSignin(req, res, next) {
     let payload
     let token
-    client.verifyIdToken({
-            idToken: req.headers.access_token,
-            audience: process.env.GCLIENTID
+    client
+      .verifyIdToken({
+        idToken: req.headers.access_token,
+        audience: process.env.GCLIENTID
+      })
+      .then(result => {
+        payload = result.getPayload()
+        return Owner.findOne({
+          where: {
+            email: payload.email
+          }
         })
-        .then(result => {
-            payload = result.getPayload();
-            return Owner.findOne({
-                where: {
-                    email: payload.email
-                }
-            });
+      })
+      .then(data => {
+        if (!data) {
+          return Owner.create({
+            username: payload.name,
+            email: payload.email,
+            password: process.env.GCLIENTSECRET
+          })
+        } else return data
+      })
+      .then(data => {
+        let payload = {
+          id: data.id,
+          email: data.email,
+          WarungId: data.Warung.id
+        }
+        token = jwt.sign(
+          {
+            payload
+          },
+          private_key
+        )
+        return Warung.create({
+          name: data.username || 'warung-q',
+          OwnerId: data.id
         })
-        .then(data => {
-            if (!data) {
-                return Owner.create({
-                    username: payload.name,
-                    email: payload.email,
-                    password: process.env.GCLIENTSECRET,
-                });
-            } else return data;
+      })
+      .then(result => {
+        res.status(200).json({
+          token
         })
-        .then(data => {
-            let payload = {
-                id: data.id,
-                email: data.email,
-                WarungId: data.Warung.id
-            };
-            token = jwt.sign({
-                payload
-            }, private_key);
-            return Warung.create({
-              name: data.username,
-              OwnerId: data.id
-            })
-        })
-        .then(result => {
-          res.status(200).json({
-            token
-          });
-        })
-        .catch(err => {
-            console.log(err, "dari error google sign in")
-            next(err);
-        });
+      })
+      .catch(err => {
+        console.log(err, 'dari error google sign in')
+        next(err)
+      })
   }
 }
 

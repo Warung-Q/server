@@ -5,7 +5,7 @@ const nodemailer = require('nodemailer')
 function cron_expired() {
   let date1
   let date2 = new Date()
-  cron.schedule('0 7 * * *', () => {
+  cron.schedule('0 0 * * *', () => {
     //cron running daily
     // console.log('cron running daily')
     Warung.findAll({

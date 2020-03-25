@@ -121,6 +121,7 @@ Owner login with google
   None
 
 - **Data Params**
+
   ```json
   {
     "email": "bau@mail.com",
@@ -703,6 +704,80 @@ Create new transaction to database
       "total": 20000
     }
     ```
+
+## **find All Transactions**
+
+Returns json data about transactions
+
+- **URL**
+
+  /transaction
+
+- **Method:**
+
+  `GET`
+
+- **URL Params**
+
+  none
+
+- **Data Params**
+
+  none
+
+- **Success Response:**
+
+* **Code:** 200 <br />
+  **Content:** `{
+
+  ```json
+  [
+    {
+      "id": 1,
+      "name": "Report Pad",
+      "ProductId": 6,
+      "quantity": 4,
+      "total_price": 130000,
+      "WarungId": 1,
+      "createdAt": "2020-03-24T04:16:56.384Z",
+      "updatedAt": "2020-03-24T04:16:56.384Z",
+      "Product": {
+        "id": 6,
+        "name": "Alkohol 70%",
+        "price": 32500,
+        "stock": 100,
+        "barcode": "8997050802987",
+        "WarungId": 1,
+        "CategoryId": 3,
+        "expired_date": "2025-05-05T00:00:00.000Z",
+        "createdAt": "2020-03-23T08:10:52.797Z",
+        "updatedAt": "2020-03-25T07:11:45.637Z"
+      }
+    },
+    {
+      "id": 2,
+      "name": "Report Pad",
+      "ProductId": 7,
+      "quantity": 4,
+      "total_price": 300000,
+      "WarungId": 1,
+      "createdAt": "2020-03-24T04:16:56.385Z",
+      "updatedAt": "2020-03-24T04:16:56.385Z",
+      "Product": {
+        "id": 7,
+        "name": "Report Pad",
+        "price": 75000,
+        "stock": 70,
+        "barcode": "8995757632005",
+        "WarungId": 1,
+        "CategoryId": 4,
+        "expired_date": "2030-05-25T00:00:00.000Z",
+        "createdAt": "2020-03-23T08:10:52.797Z",
+        "updatedAt": "2020-03-25T03:27:05.097Z"
+      }
+    }
+  ]
+  ```
 
 # NEWS Routes
 
